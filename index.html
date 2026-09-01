@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>कर्मयोग रेडियो</title>
+<style>
+  :root{
+    --accent:#e0a458;
+    --text:#f2e8de;
+    --muted:#c9b8a8;
+    --dark:#1c110d;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Segoe UI', Roboto, sans-serif;
+    color:var(--text);
+    background:#000 url('Bg.jpg') center/cover no-repeat fixed;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    position:relative;
+  }
+  /* dark overlay so text stays readable over any bg image */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.75));
+    z-index:0;
+  }
+  .wrap{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:480px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:16px;
+    min-height:100vh;
+  }
+
+  /* top bar */
+  .top-bar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .pill{
+    background:rgba(28,17,13,0.75);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(224,164,88,0.25);
+    color:var(--text);
+    font-size:0.78rem;
+    padding:8px 14px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .pill.online{color:#6fe06f; font-weight:600;}
+  .pill.online b{color:var(--text); font-weight:600; margin-left:2px;}
+  .pill.online::before{
+    content:"●";
+    color:#5fd15f;
+    animation:blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink{
+    0%,100%{opacity:1;}
+    50%{opacity:0.25;}
+  }
+
+  /* desktop polish: keep mobile-first layout but frame it nicely on wide screens */
+  @media (min-width:700px){
+    .wrap{
+      max-width:460px;
+      min-height:92vh;
+      margin:4vh auto;
+      border-radius:28px;
+      background:rgba(0,0,0,0.25);
+      box-shadow:0 20px 60px rgba(0,0,0,0.5);
+      border:1px solid rgba(224,164,88,0.15);
+    }
+  }
+
+  /* hero title */
+  .hero{
+    text-align:center;
+    margin-top:14vh;
+  }
+  .hero h1{
+    font-size:2.6rem;
+    font-weight:800;
+    text-shadow:0 4px 18px rgba(0,0,0,0.6);
+    line-height:1.15;
+  }
+  .hero p{
+    color:var(--muted);
+    margin-top:10px;
+    font-size:0.9rem;
+  }
+  .live-chat{
+    margin-top:18px;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:rgba(28,17,13,0.7);
+    border:1px solid rgba(224,164,88,0.3);
+    padding:9px 18px;
+    border-radius:30px;
+    font-size:0.85rem;
+    color:var(--accent);
+    cursor:pointer;
+  }
+
+  /* quick action pills */
+  .quick-actions{
+    margin-top:auto;
+    display:flex;
+    gap:10px;
+    width:100%;
+    justify-content:center;
+    flex-wrap:wrap;
+    padding-bottom:16px;
+  }
+  .quick-actions .pill{font-size:0.82rem;}
+
+  /* floating bottom mini player */
+  .mini-player{
+    width:100%;
+    background:rgba(18,10,8,0.9);
+    backdrop-filter:blur(10px);
+    border:1px solid rgba(224,164,88,0.2);
+    border-radius:20px;
+    padding:12px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .mini-player .top-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    width:100%;
+  }
+  .mini-player .bottom-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    width:100%;
+    flex-wrap:wrap;
+  }
+  .cover{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    overflow:hidden;
+    border:2px solid var(--accent);
+    flex-shrink:0;
+    background:linear-gradient(135deg,#3a2a20,#1c110d);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.4rem;
+    box-shadow:0 0 0 3px rgba(224,164,88,0.15), 0 4px 14px rgba(0,0,0,0.5);
+  }
+  .cover img{width:100%;height:100%;object-fit:cover;}
+  .cover.spin{animation:spin 6s linear infinite;}
+  @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+  .track-info{flex:1; min-width:0;}
+  .track-title{
+    font-size:0.9rem;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .track-sub{
+    font-size:0.72rem;
+    color:var(--muted);
+    margin-top:2px;
+  }
+
+  .controls{display:flex; align-items:center; gap:6px;}
+  .controls button{
+    background:rgba(255,255,255,0.08);
+    border:none;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    color:var(--text);
+  }
+  .controls button.play-pause{
+    background:var(--accent);
+    width:40px;
+    height:40px;
+  }
+  .controls button.vol-btn{
+    width:32px;
+    height:32px;
+  }
+  .vol-label{display:none;}
+  .controls svg{width:16px;height:16px;}
+  .controls button.play-pause svg{width:18px;height:18px; fill:#1c110d;}
+  .controls button svg{fill:var(--text);}
+
+  #ytFrame{display:none;}
+
+  footer{
+    position:relative;
+    z-index:1;
+    color:var(--muted);
+    font-size:0.68rem;
+    text-align:center;
+    padding:10px 0 4px;
+    opacity:0.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="top-bar">
+    <div class="pill online" id="onlineCount"><b>1083</b>&nbsp;online</div>
+    <div class="pill" id="supportPill">❤️ Support Us</div>
+  </div>
+
+  <div class="hero">
+    <h1>कर्मयोग<br>रेडियो</h1>
+    <!-- <p>Bhajan · Baarish · Purane Gaane · Prerna</p> 
+    <div class="live-chat">💬 Live </div> -->
+  </div>
+
+  <div class="quick-actions">
+    <!-- <div class="pill">☁️ Baarish?</div> -->
+    <div class="pill">🔥 Prerna Speech</div>
+    <div class="pill">📤 Share</div>
+  </div>
+
+  <div class="mini-player">
+    <div class="top-row">
+      <div class="cover" id="coverIcon">
+        <img src="logo.png" onerror="this.style.display='none'; this.parentElement.textContent='🙏';" alt="logo">
+      </div>
+      <div class="track-info">
+        <div class="track-title" id="nowTitle">प्रेमानंद जी — Satsang & Bhajan</div>
+        <div class="track-sub" id="nowSub">Tap play to start</div>
+      </div>
+    </div>
+    <div class="bottom-row controls">
+      <button onclick="playerCmd('previousVideo')" aria-label="previous">
+        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+      </button>
+      <button class="play-pause" id="playPauseBtn" onclick="togglePlay()" aria-label="play">
+        <svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="pauseIcon" viewBox="0 0 24 24" style="display:none"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+      </button>
+      <button onclick="playerCmd('nextVideo')" aria-label="next">
+        <svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zm-9.5 6L15 6v12z"/></svg>
+      </button>
+      <span style="width:8px"></span>
+      <button class="vol-btn" id="muteBtn" onclick="toggleMute()" aria-label="mute">
+        <svg id="volIcon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 00-2.5-4v8a4.5 4.5 0 002.5-4zM14 3v2.06a7 7 0 010 13.88V21a9 9 0 000-18z"/></svg>
+        <svg id="muteIcon" viewBox="0 0 24 24" style="display:none"><path d="M16.5 12l3-3-1.06-1.06-3 3-3-3L11.38 9l3 3-3 3 1.06 1.06 3-3 3 3L19.5 15z M3 9v6h4l5 5V4L7 9H3z"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<footer>प्रेमानंद रेडियो · playlist se chal raha hai</footer>
+
+<!-- youtube player container, controlled via official IFrame API for reliable next/prev/volume -->
+<div id="ytFrame"></div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player;
+let isPlaying = false;
+let currentVolume = 70;
+
+function onYouTubeIframeAPIReady(){
+  player = new YT.Player('ytFrame', {
+    height:'0', width:'0',
+    playerVars:{
+      listType:'playlist',
+      list:'PLCPcJsuLOgYU',
+      autoplay:1
+    },
+    events:{
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange
+    }
+  });
+}
+
+function onPlayerReady(e){
+  e.target.setVolume(currentVolume);
+  document.getElementById('volLabel').textContent = currentVolume + '%';
+  e.target.playVideo();
+}
+
+function onPlayerStateChange(e){
+  if(e.data === YT.PlayerState.PLAYING){
+    setPlayingUI(true);
+    updateNowPlaying();
+  } else if(e.data === YT.PlayerState.PAUSED){
+    setPlayingUI(false);
+  }
+}
+
+function updateNowPlaying(){
+  try{
+    const data = player.getVideoData();
+    if(data && data.title){
+      document.getElementById('nowTitle').textContent = data.title;
+    }
+  }catch(err){}
+}
+
+function playerCmd(func){
+  if(!player || typeof player[func] !== 'function') return;
+  player[func]();
+}
+
+function togglePlay(){
+  if(!player) return;
+  if(isPlaying){
+    player.pauseVideo();
+    setPlayingUI(false);
+  } else {
+    player.playVideo();
+    setPlayingUI(true);
+  }
+}
+
+let isMuted = false;
+function toggleMute(){
+  if(!player) return;
+  if(isMuted){
+    player.unMute();
+    player.setVolume(currentVolume);
+    isMuted = false;
+  } else {
+    player.mute();
+    isMuted = true;
+  }
+  document.getElementById('volIcon').style.display = isMuted ? 'none' : 'block';
+  document.getElementById('muteIcon').style.display = isMuted ? 'block' : 'none';
+}
+
+function setPlayingUI(playing){
+  isPlaying = playing;
+  document.getElementById('playIcon').style.display = playing ? 'none' : 'block';
+  document.getElementById('pauseIcon').style.display = playing ? 'block' : 'none';
+  document.getElementById('coverIcon').classList.toggle('spin', playing);
+  document.getElementById('nowSub').textContent = playing ? 'Playing…' : 'Paused';
+}
+
+// live online counter fluctuation
+setInterval(()=>{
+  const base = 1000 + Math.floor(Math.random()*400);
+  document.getElementById('onlineCount').innerHTML = `<b>${base}</b>&nbsp;online`;
+}, 6000);
+</script>
+
+</body>
+</html>
