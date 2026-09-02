@@ -29,7 +29,12 @@ phir neeche wali dono lines ka comment hatao aur ID replace karo.
     --dark:#1c110d;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{height:100%;}
+  html,body{
+    height:100%;
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+  }
   body{
     font-family:'Poppins', 'Segoe UI', Roboto, sans-serif;
     color:var(--text);
@@ -58,6 +63,7 @@ phir neeche wali dono lines ka comment hatao aur ID replace karo.
     align-items:center;
     padding:16px;
     min-height:100vh;
+    overflow-x:hidden;
   }
 
   /* top bar */
@@ -68,6 +74,7 @@ phir neeche wali dono lines ka comment hatao aur ID replace karo.
     width:100%;
     gap:8px;
     flex-wrap:wrap;
+    max-width:100%;
   }
   .pill{
     background:rgba(28,17,13,0.75);
@@ -175,7 +182,13 @@ phir neeche wali dono lines ka comment hatao aur ID replace karo.
     justify-content:center;
     gap:8px;
     width:100%;
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
+  }
+  @media (max-width:360px){
+    .mini-player .bottom-row{gap:4px;}
+    .controls button{width:30px; height:30px;}
+    .controls button.play-pause{width:36px; height:36px;}
+    .controls button.vol-btn{width:28px; height:28px;}
   }
   .cover{
     width:52px;
@@ -259,7 +272,7 @@ phir neeche wali dono lines ka comment hatao aur ID replace karo.
   </div>
 
   <div class="hero">
-    <h1>प्रेमानंद<br>रेडियो</h1>
+    <h1>प्रेमानंद जी<br>की बातें</h1>
     <p>Bhajan · Baarish · Purane Gaane · Prerna</p>
     <div class="live-chat">💬 Live Chat</div>
   </div>
@@ -444,3 +457,4 @@ setInterval(()=>{
 
 </body>
 </html>
+
