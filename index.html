@@ -3,7 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>कर्मयोग रेडियो</title>
+<title>प्रेमानंद रेडियो</title>
+
+<!-- ===== Google Analytics (optional) =====
+Apna GA Measurement ID (jaisa G-XXXXXXXXXX) analytics.google.com se free banao,
+phir neeche wali dono lines ka comment hatao aur ID replace karo.
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX');
+</script>
+===== end analytics ===== -->
 <style>
   :root{
     --accent:#e0a458;
@@ -16,7 +29,7 @@
   body{
     font-family:'Segoe UI', Roboto, sans-serif;
     color:var(--text);
-    background:#000 url('Bg.jpg') center/cover no-repeat fixed;
+    background:#000 url('bg.jpg') center/cover no-repeat fixed;
     min-height:100vh;
     display:flex;
     flex-direction:column;
@@ -131,7 +144,7 @@
     flex-wrap:wrap;
     padding-bottom:16px;
   }
-  .quick-actions .pill{font-size:0.82rem;}
+  .quick-actions .pill{font-size:0.82rem; border:1px solid transparent; transition:border-color 0.2s;}
 
   /* floating bottom mini player */
   .mini-player{
@@ -237,19 +250,20 @@
 
   <div class="top-bar">
     <div class="pill online" id="onlineCount"><b>1083</b>&nbsp;online</div>
-    <div class="pill" id="supportPill">❤️ Support Us</div>
+    <div class="pill" id="supportPill" onclick="openSupport()">❤️ Support Us</div>
   </div>
 
   <div class="hero">
-    <h1>कर्मयोग<br>रेडियो</h1>
-    <!-- <p>Bhajan · Baarish · Purane Gaane · Prerna</p> 
-    <div class="live-chat">💬 Live </div> -->
+    <h1>प्रेमानंद<br>रेडियो</h1>
+    <p>Bhajan · Baarish · Purane Gaane · Prerna</p>
+    <div class="live-chat">💬 Live Chat</div>
   </div>
 
   <div class="quick-actions">
-    <!-- <div class="pill">☁️ Baarish?</div> -->
-    <div class="pill">🔥 Prerna Speech</div>
-    <div class="pill">📤 Share</div>
+    <div class="pill" onclick="switchMood('main')" id="moodMain">🙏 Bhajan</div>
+    <div class="pill" onclick="switchMood('baarish')" id="moodBaarish">☁️ Baarish</div>
+    <div class="pill" onclick="switchMood('motivation')" id="moodMotivation">🔥 Prerna</div>
+    <div class="pill" onclick="shareOnWhatsApp()">📤 Share</div>
   </div>
 
   <div class="mini-player">
@@ -294,12 +308,20 @@ let player;
 let isPlaying = false;
 let currentVolume = 70;
 
+// ===== EDIT: apni alag mood playlists ki ID yahan daalo =====
+const MOODS = {
+  main:      { id:'PLCPcJsuLOgYU', label:'प्रेमानंद जी — Satsang & Bhajan' },
+  baarish:   { id:'PLCPcJsuLOgYU', label:'बारिश में पुराने गाने' },      // TODO: apni baarish playlist ID daalo
+  motivation:{ id:'PLCPcJsuLOgYU', label:'प्रेरणादायक भाषण' }            // TODO: apni motivational playlist ID daalo
+};
+let currentMood = 'main';
+
 function onYouTubeIframeAPIReady(){
   player = new YT.Player('ytFrame', {
     height:'0', width:'0',
     playerVars:{
       listType:'playlist',
-      list:'PLCPcJsuLOgYU',
+      list:MOODS.main.id,
       autoplay:1
     },
     events:{
@@ -309,10 +331,46 @@ function onYouTubeIframeAPIReady(){
   });
 }
 
+function switchMood(mood){
+  if(!player || !MOODS[mood]) return;
+  currentMood = mood;
+  document.querySelectorAll('.quick-actions .pill').forEach(p=>p.style.borderColor='');
+  const el = document.getElementById('mood' + mood.charAt(0).toUpperCase() + mood.slice(1));
+  if(el) el.style.borderColor = 'var(--accent)';
+  document.getElementById('nowTitle').textContent = MOODS[mood].label;
+  player.loadPlaylist({listType:'playlist', list:MOODS[mood].id});
+}
+
+function shareOnWhatsApp(){
+  const url = window.location.href;
+  const text = encodeURIComponent('यादों का रेडियो सुनो — ' + url);
+  window.open('https://wa.me/?text=' + text, '_blank');
+}
+
+function openSupport(){
+  // apna UPI ID daalo yahan (jaise name@upi)
+  const upiId = 'yourupi@bank';
+  const upiLink = `upi://pay?pa=${upiId}&pn=Premanand%20Radio&cu=INR`;
+  window.location.href = upiLink;
+}
+
 function onPlayerReady(e){
   e.target.setVolume(currentVolume);
-  document.getElementById('volLabel').textContent = currentVolume + '%';
-  e.target.playVideo();
+
+  // each visit on this device starts a different track from the playlist
+  try{
+    let visitCount = parseInt(localStorage.getItem('radioVisitCount') || '0', 10);
+    localStorage.setItem('radioVisitCount', visitCount + 1);
+    const playlist = e.target.getPlaylist();
+    if(playlist && playlist.length > 0){
+      const startIndex = visitCount % playlist.length;
+      e.target.playVideoAt(startIndex);
+    } else {
+      e.target.playVideo();
+    }
+  } catch(err){
+    e.target.playVideo();
+  }
 }
 
 function onPlayerStateChange(e){
@@ -381,3 +439,4 @@ setInterval(()=>{
 
 </body>
 </html>
+
